@@ -1,41 +1,39 @@
-# Prerequisites
-*.d
+# Build directories
+out/
+build/
+cmake-build-*/
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+compile_commands.json
+*.ninja
+*.ninja_deps
+*.ninja_log
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.sln.docstates
+
+# Binaries
+*.exe
+*.dll
+*.lib
 *.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
+*.o
+*.a
 *.so
 *.dylib
-*.dll
 
-# Fortran module files
-*.mod
-*.smod
+# IDE specific
+.vscode/
+.idea/
+*.swp
+*~
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# debug information files
-*.dwo
+# OS specific
+.DS_Store
+Thumbs.db
