@@ -1,0 +1,19 @@
+BasedOnStyle: Google
+---
+Language: Cpp
+AllowShortEnumsOnASingleLine: true
+FixNamespaceComments: true
+IncludeBlocks: Regroup
+IndentWidth: 4
+ReflowComments: true
+SpacesBeforeTrailingComments: 2
+ColumnLimit: 120
+BreakConstructorInitializers: BeforeComma
+AllowAllConstructorInitializersOnNextLine: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+BreakBeforeBraces: Custom
+BraceWrapping:
+  BeforeCatch: true
+  BeforeElse: true
+BinPackArguments: false
+BinPackParameters: false

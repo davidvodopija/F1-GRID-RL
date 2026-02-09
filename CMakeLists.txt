@@ -4,6 +4,7 @@ project(F1GridWorld VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message(STATUS "Nice! Using Clang.")
@@ -12,6 +13,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         -Wextra 
         -Wpedantic 
         -Wno-unused-parameter
+        -Wno-c++98-compat
+        -Wno-c++98-compat-pedantic
     )
 elseif(MSVC)
     add_compile_options(/W4)
@@ -37,7 +40,10 @@ set(SFML_BUILD_NETWORK OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(sfml)
 
 
-file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp")
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
+    "src/*.cpp"
+    "src/*.hpp"
+)   
 
 add_executable(F1Sim ${SOURCES})
 
