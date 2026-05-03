@@ -7,8 +7,6 @@ namespace F1RL {
 
 enum class Surface : uint8_t {
     Tarmac,
-    Gravel,
-    Wall,
     OutOfTrack,
 };
 
@@ -66,7 +64,6 @@ struct SimulationConfig {
     float TIME_PENALTY;
     float SPEEDING_PENALTY;
     float CRASH_PENALTY;
-    float TIRE_WEAR_GRAVEL;
     float TIRE_WEAR_TARMAC;
     float LAP_REWARD;
     float TRACK_LIMIT_PENALTY;

@@ -107,7 +107,7 @@ StepResult GridWorld::step(Action action) {
     for (int i = 0; i < current_state_.speed; ++i) {
         Position next_pos{current_state_.position.x + forward.x, current_state_.position.y + forward.y};
         const Cell& next_cell = getCell(next_pos.x, next_pos.y);
-        if (next_cell.surface == Surface::Wall || next_cell.surface == Surface::OutOfTrack) {
+        if (next_cell.surface == Surface::OutOfTrack) {
             current_state_.crashed = true;
             current_state_.speed = 0;
             reward += config_.CRASH_PENALTY;
@@ -117,15 +117,7 @@ StepResult GridWorld::step(Action action) {
 
         current_state_.position = next_pos;
 
-        float wear = config_.TIRE_WEAR_TARMAC;
-        if (next_cell.surface == Surface::Gravel) {
-            wear = config_.TIRE_WEAR_GRAVEL;
-            current_state_.lap_invalidated = true;
-            current_state_.speed = std::max(0, current_state_.speed - 1);
-            reward += config_.TRACK_LIMIT_PENALTY;
-        }
-
-        current_state_.tire_health = std::max(0.0f, current_state_.tire_health - wear);
+        current_state_.tire_health = std::max(0.0f, current_state_.tire_health - config_.TIRE_WEAR_TARMAC);
         reward -= (1.0f - current_state_.tire_health) *
                   (1.0f - current_state_.tire_health);  // Progresivno vise boli vozit na starim gumama
 

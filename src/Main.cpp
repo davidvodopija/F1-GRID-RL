@@ -59,9 +59,7 @@ int main() {
                 rect.setPosition({x * cellSize, y * cellSize});
 
                 // Base Surface
-                if (cell.surface == Surface::Wall)
-                    rect.setFillColor(sf::Color(150, 50, 50));
-                else if (cell.surface == Surface::Gravel)
+                if (cell.surface == Surface::OutOfTrack)
                     rect.setFillColor(sf::Color(50, 150, 50));
                 else
                     rect.setFillColor(sf::Color(80, 80, 80));

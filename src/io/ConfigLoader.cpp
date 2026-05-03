@@ -45,8 +45,6 @@ SimulationConfig ConfigLoader::loadSimulationConfig(const std::string& filepath)
                     config.SPEEDING_PENALTY = std::stof(value);
                 else if (key == "CRASH_PENALTY")
                     config.CRASH_PENALTY = std::stof(value);
-                else if (key == "TIRE_WEAR_GRAVEL")
-                    config.TIRE_WEAR_GRAVEL = std::stof(value);
                 else if (key == "TIRE_WEAR_TARMAC")
                     config.TIRE_WEAR_TARMAC = std::stof(value);
                 else if (key == "LAP_REWARD")

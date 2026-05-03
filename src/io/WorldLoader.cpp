@@ -40,11 +40,8 @@ MapData WorldLoader::loadFromJson(const std::string& filepath) {
 
             Cell& c = grid[y * w + x];
 
-            if (type == "Wall") {
-                c.surface = Surface::Wall;
-            }
-            else if (type == "Gravel") {
-                c.surface = Surface::Gravel;
+            if (type == "OutOfTrack") {
+                c.surface = Surface::OutOfTrack;
             }
             else {
                 c.surface = Surface::Tarmac;
