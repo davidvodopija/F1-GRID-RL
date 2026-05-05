@@ -29,6 +29,7 @@ MapData WorldLoader::loadFromJson(const std::string& filepath) {
     size_t w = j["map"]["width"];
     size_t h = j["map"]["height"];
     std::vector<Cell> grid(w * h);
+    Position pitEntry;
 
     auto& legend = j["map"]["legend"];
     std::vector<std::string> layout = j["map"]["layout"];
@@ -68,11 +69,14 @@ MapData WorldLoader::loadFromJson(const std::string& filepath) {
             int x = feat["x"];
             int y = feat["y"];
             if (type == "StartFinish") grid[y * w + x].feature = Feature::StartFinishLine;
-            if (type == "PitEntry") grid[y * w + x].feature = Feature::PitEntry;
+            if (type == "PitEntry") {
+                grid[y * w + x].feature = Feature::PitEntry;
+                pitEntry = Position{x, y};
+            }
             if (type == "PitBox") grid[y * w + x].feature = Feature::PitBox;
         }
     }
 
-    return MapData{w, h, grid};
+    return MapData{w, h, grid, pitEntry};
 }
 }  // namespace F1RL

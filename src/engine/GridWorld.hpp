@@ -17,11 +17,13 @@ class GridWorld {
     [[nodiscard]] int getWidth() const { return width_; }
     [[nodiscard]] int getHeight() const { return height_; }
     [[nodiscard]] const Cell& getCell(int x, int y) const;
+    [[nodiscard]] Observation getObservation() const;
 
    private:
     int width_;
     int height_;
     std::vector<Cell> grid_;
+    Position pit_entry_;
     State current_state_;
     SimulationConfig config_;
 };

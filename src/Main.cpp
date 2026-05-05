@@ -42,6 +42,12 @@ int main() {
                               << " | Tire Health: " << world.getState().tire_health
                               << " | Lap Count: " << world.getState().lap_count << " | Reward: " << result.reward
                               << std::endl;
+                    Observation obs = world.getObservation();
+                    std::cout << "turn_dist: " << static_cast<int>(obs.turn_dist)
+                              << ", turn_dir: " << static_cast<int>(obs.turn_dir)
+                              << ", pit_dist: " << static_cast<int>(obs.pit_dist)
+                              << ", pit_dir: " << static_cast<int>(obs.pit_dir) << ", speed: " << static_cast<int>(obs.speed)
+                              << ", tire_state: " << static_cast<int>(obs.tire_state) << std::endl;
                     if (result.done) {
                         world.reset();
                     }
