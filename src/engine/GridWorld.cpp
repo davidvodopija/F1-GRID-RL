@@ -30,9 +30,9 @@ Observation GridWorld::getObservation() const {
     Observation obs{};
     obs.speed = current_state_.speed;
 
-    if (current_state_.tire_health > 0.5f)
+    if (current_state_.tire_health > config_.TIRE_HEALTH_WORN_THRESHOLD)
         obs.tire_state = 1;
-    else if (current_state_.tire_health > 0.2f)
+    else if (current_state_.tire_health > config_.TIRE_HEALTH_CRITICAL_THRESHOLD)
         obs.tire_state = 2;
     else
         obs.tire_state = 3;
@@ -42,7 +42,9 @@ Observation GridWorld::getObservation() const {
     int turn_distance = 0;
     Heading turn_heading = current_state_.heading;
 
-    for (int i = 0; i <= 6; ++i) {
+    const int lookahead = std::clamp(config_.OBSERVATION_LOOKAHEAD, 1, 6);
+
+    for (int i = 0; i <= lookahead; ++i) {
         const Position sample{current_state_.position.x + forward.x * i, current_state_.position.y + forward.y * i};
         const Cell& cell = getCell(sample.x, sample.y);
         if (cell.surface == Surface::OutOfTrack) {
@@ -56,7 +58,7 @@ Observation GridWorld::getObservation() const {
         }
     }
 
-    obs.turn_dist = static_cast<uint8_t>(std::clamp(turn_distance, 0, 6));
+    obs.turn_dist = static_cast<uint8_t>(std::clamp(turn_distance, 0, lookahead));
     obs.turn_dir = classifyTurnDirection(current_state_.heading, turn_heading);
 
     const Position pit_offset{pit_entry_.x - current_state_.position.x, pit_entry_.y - current_state_.position.y};
@@ -64,10 +66,10 @@ Observation GridWorld::getObservation() const {
     const int forward_dist = pit_offset.x * forward.x + pit_offset.y * forward.y;
     const int lateral_dist = std::abs(forward.x * pit_offset.y - forward.y * pit_offset.x);
 
-    int pit_distance = 6;
+    int pit_distance = lookahead;
 
-    if (forward_dist >= 0 && lateral_dist <= 1) {
-        pit_distance = std::min(forward_dist, 6);
+    if (forward_dist >= 0 && lateral_dist <= config_.PIT_LATERAL_THRESHOLD) {
+        pit_distance = std::min(forward_dist, lookahead);
     }
 
     obs.pit_dist = static_cast<uint8_t>(pit_distance);
@@ -213,8 +215,8 @@ StepResult GridWorld::step(Action action) {
         current_state_.position = next_pos;
 
         current_state_.tire_health = std::max(0.0f, current_state_.tire_health - config_.TIRE_WEAR_TARMAC);
-        reward -= (1.0f - current_state_.tire_health) *
-                  (1.0f - current_state_.tire_health);  // Progresivno vise boli vozit na starim gumama
+        //reward -= (1.0f - current_state_.tire_health) *
+        //          (1.0f - current_state_.tire_health);  // Progresivno vise boli vozit na starim gumama
 
         if (next_cell.surface == Surface::Tarmac) {
             if (isOppositeHeading(current_state_.heading, next_cell.expected_heading)) {

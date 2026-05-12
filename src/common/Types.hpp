@@ -1,8 +1,9 @@
 #pragma once
-#include <cstddef>
 #include <compare>
+#include <cstddef>
 #include <cstdint>
 #include <vector>
+#include <string>
 
 namespace F1RL {
 
@@ -24,7 +25,6 @@ struct Cell {
 struct Position {
     int x = 0;
     int y = 0;
-    auto operator<=>(const Position&) const = default;
 };
 
 struct MapData {
@@ -32,6 +32,18 @@ struct MapData {
     std::size_t height;
     std::vector<Cell> grid;
     Position pitEntry;
+};
+
+enum class RunMode { Manual, AI };
+
+struct AppConfig {
+    RunMode mode = RunMode::AI;
+
+    std::string trackPath;
+    std::string simulationConfigPath;
+
+    float cellSize = 60.0f;
+    float aiStepDelaySeconds = 0.5f;
 };
 
 enum class Action : uint8_t { Accelerate, Brake, TurnLeft, TurnRight, Keep };
@@ -54,17 +66,28 @@ struct StepResult {
 };
 
 struct SimulationConfig {
-    int PIT_STOP_DURATION;
-    int MAX_SPEED;
-    int PITLANE_LIMITER;
-    float TIME_PENALTY;
-    float SPEEDING_PENALTY;
-    float CRASH_PENALTY;
-    float TIRE_WEAR_TARMAC;
-    float LAP_REWARD;
-    float TRACK_LIMIT_PENALTY;
-    float DRIVING_BACKWARD_PENALTY;
-    float DRIVING_CORRECT_WAY_REWARD;
+    int PIT_STOP_DURATION = 5;
+    int MAX_SPEED = 3; // DO NOT CHANGE (toHash change required)
+    int PITLANE_LIMITER = 1;
+    int OBSERVATION_LOOKAHEAD = 6; // DO NOT CHANGE (toHash change required)
+    int PIT_LATERAL_THRESHOLD = 1;
+    float TIME_PENALTY = -1.0f;
+    float SPEEDING_PENALTY = -3.0f;
+    float CRASH_PENALTY = -10000.0f;
+    float TIRE_WEAR_TARMAC = 0.002f;
+    float TIRE_HEALTH_WORN_THRESHOLD = 0.5f;
+    float TIRE_HEALTH_CRITICAL_THRESHOLD = 0.2f;
+    float LAP_REWARD = 100.0f;
+    float TRACK_LIMIT_PENALTY = -5.0f;
+    float DRIVING_BACKWARD_PENALTY = -1000.0f;
+    float DRIVING_CORRECT_WAY_REWARD = 0.8f;
+    float ALPHA = 0.1f;
+    float GAMMA = 0.99f;
+    float EPSILON = 1.0f;
+    float MIN_EPSILON = 0.01f;
+    float EPSILON_DECAY_RATE = 0.999f;
+    int TRAINING_LOG_INTERVAL = 1000;
+    int TRAINING_EPISODES = 15000;
 };
 
 struct Observation {
@@ -75,7 +98,7 @@ struct Observation {
     uint8_t pit_dir;   // same as turn
 
     uint8_t speed;
-    uint8_t tire_state;  // Contained: 0.5-1.0 healthy(1), 0.2-0.5 worn(2), <0.2 critical(3)
+    uint8_t tire_state;  // Contained: healthy(1), worn(2), critical(3)
 
     [[nodiscard]] std::size_t toHash() const {
         std::size_t hash = 0;

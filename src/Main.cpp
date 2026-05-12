@@ -1,106 +1,65 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <optional>
+#include <string>
 
+#include "ai/AgentTrainer.hpp"
+#include "ai/QLearningAgent.hpp"
 #include "common/Types.hpp"
 #include "engine/GridWorld.hpp"
-#include "io/WorldLoader.hpp"
+#include "engine/SimulationRunner.hpp"
 #include "io/ConfigLoader.hpp"
+#include "io/WorldLoader.hpp"
 
 using namespace F1RL;
 
-int main() {
-    MapData map = WorldLoader::loadFromJson("assets/track1.json");
-    SimulationConfig simulationConfig = ConfigLoader::loadSimulationConfig("assets/simulation_config.config");
-    GridWorld world(map, simulationConfig);
+static AppConfig createConfig(int argc, char** argv) {
+    AppConfig config;
 
-    float cellSize = 60.0f;
-    sf::RenderWindow window(
-        sf::VideoMode({(unsigned int)(world.getWidth() * cellSize), (unsigned int)(world.getHeight() * cellSize)}),
-        "F1 Grid World");
-    window.setFramerateLimit(60);
+    /*
+        Usage examples:
 
-    while (window.isOpen()) {
-        while (const std::optional event = window.pollEvent()) {
-            if (event->is<sf::Event::Closed>()) window.close();
+        ./app ai assets/track1.json assets/config1.config
+        ./app manual assets/track2.json assets/config2.config
+    */
 
-            if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-                Action act = Action::Keep;
-                if (keyPressed->code == sf::Keyboard::Key::Up)
-                    act = Action::Accelerate;
-                else if (keyPressed->code == sf::Keyboard::Key::Down)
-                    act = Action::Brake;
-                else if (keyPressed->code == sf::Keyboard::Key::Left)
-                    act = Action::TurnLeft;
-                else if (keyPressed->code == sf::Keyboard::Key::Right)
-                    act = Action::TurnRight;
-                else if (keyPressed->code == sf::Keyboard::Key::R)
-                    world.reset();
-
-                if (act != Action::Keep || keyPressed->code == sf::Keyboard::Key::Space) {
-                    StepResult result = world.step(act);
-                    std::cout << " | Speed: " << world.getState().speed
-                              << " | Tire Health: " << world.getState().tire_health
-                              << " | Lap Count: " << world.getState().lap_count << " | Reward: " << result.reward
-                              << std::endl;
-                    Observation obs = world.getObservation();
-                    std::cout << "turn_dist: " << static_cast<int>(obs.turn_dist)
-                              << ", turn_dir: " << static_cast<int>(obs.turn_dir)
-                              << ", pit_dist: " << static_cast<int>(obs.pit_dist)
-                              << ", pit_dir: " << static_cast<int>(obs.pit_dir) << ", speed: " << static_cast<int>(obs.speed)
-                              << ", tire_state: " << static_cast<int>(obs.tire_state) << std::endl;
-                    if (result.done) {
-                        world.reset();
-                    }
-                }
-            }
-        }
-
-        window.clear(sf::Color(30, 30, 30));
-
-        sf::RectangleShape rect({cellSize - 1.0f, cellSize - 1.0f});
-
-        for (int y = 0; y < world.getHeight(); ++y) {
-            for (int x = 0; x < world.getWidth(); ++x) {
-                const Cell& cell = world.getCell(x, y);
-                rect.setPosition({x * cellSize, y * cellSize});
-
-                // Base Surface
-                if (cell.surface == Surface::OutOfTrack)
-                    rect.setFillColor(sf::Color(50, 150, 50));
-                else
-                    rect.setFillColor(sf::Color(80, 80, 80));
-
-                // Features Overlay
-                switch (cell.feature) {
-                    case Feature::StartFinishLine:
-                        rect.setFillColor(sf::Color::White);
-                        break;
-                    case Feature::PitEntry:
-                        rect.setFillColor(sf::Color(200, 200, 0));
-                        break;
-                    case Feature::PitLane:
-                        rect.setFillColor(sf::Color(100, 100, 255));
-                        break;
-                    case Feature::PitBox:
-                        rect.setFillColor(sf::Color(0, 0, 255));
-                        break;
-                    default:
-                        break;
-                }
-
-                window.draw(rect);
-            }
-        }
-
-        // Draw Car
-        State state = world.getState();
-        sf::CircleShape car(cellSize / 3);
-        car.setFillColor(sf::Color::Cyan);
-        car.setOrigin({cellSize / 3, cellSize / 3});
-        car.setPosition({state.position.x * cellSize + cellSize / 2, state.position.y * cellSize + cellSize / 2});
-        window.draw(car);
-        window.display();
+    if (argc != 4) {
+        throw std::invalid_argument("Invalid number of parameters");
     }
+
+    std::string modeArg = argv[1];
+    if (modeArg == "manual") {
+        config.mode = RunMode::Manual;
+    }
+    else if (modeArg == "ai") {
+        config.mode = RunMode::AI;
+    }
+    else {
+        throw std::invalid_argument("Unsupported run mode");
+    }
+
+    config.trackPath = argv[2];
+    config.simulationConfigPath = argv[3];
+
+    return config;
+}
+
+int main(int argc, char** argv) {
+    AppConfig appConfig = createConfig(argc, argv);
+
+    MapData map = WorldLoader::loadFromJson(appConfig.trackPath);
+    SimulationConfig simulationConfig = ConfigLoader::loadSimulationConfig(appConfig.simulationConfigPath);
+
+    GridWorld world(map, simulationConfig);
+    QLearningAgent agent(simulationConfig.ALPHA, simulationConfig.GAMMA, simulationConfig.EPSILON);
+
+    if (appConfig.mode == RunMode::AI) {
+        AgentTrainer trainer(world, agent, simulationConfig);
+        trainer.train(simulationConfig.TRAINING_EPISODES);
+    }
+
+    SimulationRunner simulationRunner(world, agent, appConfig);
+    simulationRunner.runSimulation();
 
     return 0;
 }

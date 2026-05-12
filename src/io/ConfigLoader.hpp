@@ -1,7 +1,7 @@
 #pragma once
 #include <map>
 #include <ostream>
-#include <string>ž
+#include <string>
 #include "../common/Types.hpp"
 
 namespace F1RL {
