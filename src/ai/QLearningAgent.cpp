@@ -45,7 +45,8 @@ double QLearningAgent::getMaxQ(const Observation& state) {
     return *std::max_element(q_values.begin(), q_values.end());
 }
 
-void QLearningAgent::learn(const Observation& state, Action action, double reward, const Observation& next_state) {
+void QLearningAgent::learn(const Observation& state, Action action, double reward, const Observation& next_state,
+                           bool terminal) {
     size_t hash = state.toHash();
     size_t action_index = static_cast<int>(action);
 
@@ -54,7 +55,7 @@ void QLearningAgent::learn(const Observation& state, Action action, double rewar
     }
 
     double current_q = q_table_[hash][action_index];
-    double max_next_q = getMaxQ(next_state);
+    double max_next_q = terminal ? 0.0 : getMaxQ(next_state);
 
     double target = reward + gamma_ * max_next_q;
     q_table_[hash][action_index] = current_q + alpha_ * (target - current_q);

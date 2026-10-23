@@ -26,7 +26,7 @@ void AgentTrainer::train(int episodes) {
 
             Observation nextObs = world_.getObservation();
 
-            agent_.learn(obs, action, result.reward, nextObs);
+            agent_.learn(obs, action, result.reward, nextObs, result.done);
 
             done = result.done;
         }

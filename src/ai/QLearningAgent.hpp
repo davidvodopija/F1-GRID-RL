@@ -14,7 +14,8 @@ class QLearningAgent {
 
     Action act(const Observation& obs, bool exploit_only = false);
 
-    void learn(const Observation& state, Action action, double reward, const Observation& next_state);
+    void learn(const Observation& state, Action action, double reward, const Observation& next_state,
+               bool terminal = false);
 
     void decayEpsilon(double min_epsilon, double decay_rate);
 
