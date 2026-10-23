@@ -73,6 +73,10 @@ SimulationConfig ConfigLoader::loadSimulationConfig(const std::string& filepath)
                     config.MIN_EPSILON = std::stof(value);
                 else if (key == "EPSILON_DECAY_RATE")
                     config.EPSILON_DECAY_RATE = std::stof(value);
+                else if (key == "RACE_LAP_TARGET")
+                    config.RACE_LAP_TARGET = std::stoi(value);
+                else if (key == "MAX_STEPS_PER_EPISODE")
+                    config.MAX_STEPS_PER_EPISODE = std::stoi(value);
                 else if (key == "TRAINING_LOG_INTERVAL")
                     config.TRAINING_LOG_INTERVAL = std::stoi(value);
                 else if (key == "TRAINING_EPISODES")

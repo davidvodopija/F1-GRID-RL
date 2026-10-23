@@ -16,8 +16,9 @@ void AgentTrainer::train(int episodes) {
         world_.reset();
 
         bool done = false;
+        int steps = 0;
 
-        while (!done) {
+        while (!done && steps < config_.MAX_STEPS_PER_EPISODE) {
             Observation obs = world_.getObservation();
 
             Action action = agent_.act(obs, false);
@@ -29,6 +30,7 @@ void AgentTrainer::train(int episodes) {
             agent_.learn(obs, action, result.reward, nextObs, result.done);
 
             done = result.done;
+            ++steps;
         }
 
         agent_.decayEpsilon(config_.MIN_EPSILON, config_.EPSILON_DECAY_RATE);

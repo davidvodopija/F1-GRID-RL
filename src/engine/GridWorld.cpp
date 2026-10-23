@@ -202,6 +202,7 @@ StepResult GridWorld::step(Action action) {
     Position forward = getForwardVector(current_state_.heading);
 
     for (int i = 0; i < current_state_.speed; ++i) {
+        const Cell& previous_cell = getCell(current_state_.position.x, current_state_.position.y);
         Position next_pos{current_state_.position.x + forward.x, current_state_.position.y + forward.y};
         const Cell& next_cell = getCell(next_pos.x, next_pos.y);
         if (next_cell.surface == Surface::OutOfTrack) {
@@ -220,6 +221,7 @@ StepResult GridWorld::step(Action action) {
 
         if (next_cell.surface == Surface::Tarmac) {
             if (isOppositeHeading(current_state_.heading, next_cell.expected_heading)) {
+                current_state_.lap_invalidated = true;
                 reward += config_.DRIVING_BACKWARD_PENALTY;
             }
             else if (current_state_.heading == next_cell.expected_heading) {
@@ -227,15 +229,26 @@ StepResult GridWorld::step(Action action) {
             }
         }
 
-        if (next_cell.feature == Feature::StartFinishLine) {
+        const bool entered_start_finish =
+            next_cell.feature == Feature::StartFinishLine && previous_cell.feature != Feature::StartFinishLine;
+
+        if (entered_start_finish) {
             if (!current_state_.lap_invalidated) {
                 current_state_.lap_count++;
                 reward += config_.LAP_REWARD;
+
+                if (current_state_.lap_count >= config_.RACE_LAP_TARGET) {
+                    done = true;
+                }
             }
             current_state_.lap_invalidated = false;
         }
         if (next_cell.feature == Feature::PitBox && current_state_.speed - i - 1 == 0) {
             current_state_.pit_timer = config_.PIT_STOP_DURATION;
+        }
+
+        if (done) {
+            break;
         }
     }
 

@@ -86,6 +86,8 @@ struct SimulationConfig {
     float EPSILON = 1.0f;
     float MIN_EPSILON = 0.01f;
     float EPSILON_DECAY_RATE = 0.999f;
+    int RACE_LAP_TARGET = 10;
+    int MAX_STEPS_PER_EPISODE = 5000;
     int TRAINING_LOG_INTERVAL = 1000;
     int TRAINING_EPISODES = 15000;
 };
